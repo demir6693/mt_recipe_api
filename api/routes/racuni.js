@@ -3,10 +3,10 @@ const router = express.Router();
 const mysql = require('mysql');
 
 const db = mysql.createConnection({
-    host: '*',
-    user: '*',
-    password: '*',
-    database: '*'
+    host: '5.79.70.193',
+    user: 'root',
+    password: 'IDMrcxUOSoup',
+    database: 'mobile_town'
 });
 
 db.connect((err => {
