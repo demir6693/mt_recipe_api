@@ -3,10 +3,10 @@ const router = express.Router();
 const mysql = require('mysql');
 
 const db = mysql.createConnection({
-    host: '*',
-    user: '*',
-    password: '*',
-    database: '*'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'mobile_town'
 });
 
 db.connect((err => {
@@ -71,5 +71,30 @@ router.get('/getgodisnji', (req, res) => {
         res.send(result);
     });
 });
+
+//post korisnik
+router.post('/postbonus', (req, res) => {
+
+    let product = req.body;
+    let sql = "INSERT INTO korisnici(ime, prezime, korisnicko_ime, sifra, nivo, bonus)"
+    + "VALUES('" + product.name + "', '" + product.lastname + "', '" + product.username + "', '" + product.pasw + "', '" + product.level + "', '" + product.bonus + "');";
+    let query = db.query(sql, (err, result) => {
+        if(err) throw err;
+        res.send(result);
+    })
+});
+
+
+//http put
+ /* example row json
+ {
+  "name": "rmd",
+  "lastname": "user",
+  "username": "user123",
+  "pasw": "user123",
+  "level": 0,
+  "bonus": 3000
+} 
+ */
 
 module.exports = router;
