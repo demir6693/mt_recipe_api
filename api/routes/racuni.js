@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
+const jwt = require('jsonwebtoken');
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -49,15 +50,24 @@ router.get('/getdnevni', (req, res) => {
 });
 
 //mesecni
-router.get('/getmesecni', (req, res) => {
-    var datetime = new Date();
-    var current_month = datetime.getMonth() + 1;
-    var current_year = datetime.getFullYear();
-    let sql = `SELECT (SUM(iznos)- SUM(iznos_nabavna)), SUM(iznos) FROM racuni WHERE ((MONTH(datum_izdavanja)) = ${current_month}) 
-    AND (YEAR(datum_izdavanja) = ${current_year})`;
-    let query = db.query(sql, (err, result) => {
-        if(err) throw err;
-        res.send(result);
+router.get('/getmesecni', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'token', (err, authData) =>{
+        if(err)
+        {
+            res.sendStatus(403);
+        }
+        else
+        {
+            var datetime = new Date();
+            var current_month = datetime.getMonth() + 1;
+            var current_year = datetime.getFullYear();
+            let sql = `SELECT (SUM(iznos)- SUM(iznos_nabavna)), SUM(iznos) FROM racuni WHERE ((MONTH(datum_izdavanja)) = ${current_month}) 
+            AND (YEAR(datum_izdavanja) = ${current_year})`;
+            let query = db.query(sql, (err, result) => {
+            if(err) throw err;
+            res.send(result);
+            });
+        }
     });
 });
 
@@ -85,16 +95,50 @@ router.post('/postbonus', (req, res) => {
 });
 
 
+
 //http put
- /* example row json
- {
-  "name": "rmd",
-  "lastname": "user",
-  "username": "user123",
-  "pasw": "user123",
-  "level": 0,
-  "bonus": 3000
-} 
- */
+router.put('/postbonus/:id', (req, res) => {
+    const id = req.params.id; 
+    let bonus = req.body;
+    let sql = "UPDATE korisnici SET bonus = " + bonus.bonus + " WHERE id_korisnika = " + id + ";";
+    let query = db.query(sql, (err, result) => {
+        if(err) throw err;
+        res.send(result);
+    })
+});
+
+router.post('/login', (req, res) => {
+
+    const user = {
+        username: 'user',
+        pasword: 'user123'
+    }
+
+    jwt.sign({user: user}, 'token', (err, token) => {
+        res.json({
+            token
+        });
+    });
+});
+
+
+function verifyToken(req, res, next)
+{
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== 'undefined')
+    {
+        const bearer = bearerHeader.split(' ');
+
+        const bearerToken = bearer[1];
+
+        req.token = bearerToken;
+
+        next();
+    }
+    else
+    {
+        res.sendStatus(403);
+    }
+}
 
 module.exports = router;
