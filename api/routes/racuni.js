@@ -35,23 +35,35 @@ router.get('/', (req, res) => {
 });
 
 //dnevni
-router.get('/getdnevni', (req, res) => {
-    var datetime = new Date();
-    var current_day = datetime.getDate();
-    var current_month = datetime.getMonth() + 1;
-    var current_year = datetime.getFullYear();
-    let sql = `SELECT * FROM racuni WHERE ( (DAY(datum_izdavanja)) = ${current_day}
-    AND (MONTH(datum_izdavanja)) = ${current_month}) 
-    AND (YEAR(datum_izdavanja) = ${current_year})`;
-    let query = db.query(sql, (err, result) => {
-        if(err) throw err;
-        res.send(result);
+router.get('/getdnevni', verifyToken, (req, res) => {
+
+    jwt.verify(req.token, 'mobiletown', (err, authData) => {
+        if(err)
+        {
+            res.sendStatus(403);
+        }
+        else
+        {
+            var datetime = new Date();
+            var current_day = datetime.getDate();
+            var current_month = datetime.getMonth() + 1;
+            var current_year = datetime.getFullYear();
+            let sql = `SELECT * FROM racuni WHERE ( (DAY(datum_izdavanja)) = ${current_day}
+            AND (MONTH(datum_izdavanja)) = ${current_month}) 
+            AND (YEAR(datum_izdavanja) = ${current_year})`;
+            let query = db.query(sql, (err, result) => {
+                if(err) throw err;
+                res.send(result);
+            });
+        }
     });
+
 });
 
 //mesecni
 router.get('/getmesecni', verifyToken, (req, res) => {
-    jwt.verify(req.token, 'token', (err, authData) =>{
+    
+    jwt.verify(req.token, 'mobiletown', (err, authData) =>{
         if(err)
         {
             res.sendStatus(403);
@@ -69,17 +81,29 @@ router.get('/getmesecni', verifyToken, (req, res) => {
             });
         }
     });
+
 });
 
 //godisnji
-router.get('/getgodisnji', (req, res) => {
-    var datetime = new Date();
-    var current_year = datetime.getFullYear();
-    let sql = `SELECT (SUM(iznos)- SUM(iznos_nabavna)), SUM(iznos) FROM racuni WHERE (YEAR(datum_izdavanja) = ${current_year})`;
-    let query = db.query(sql, (err, result) => {
-        if(err) throw err;
-        res.send(result);
+router.get('/getgodisnji', verifyToken, (req, res) => {
+
+    jwt.verify(req.token, 'mobiletown', (err, authData) => {
+        if(err)
+        {
+            res.sendStatus(403);
+        }
+        else
+        {
+            var datetime = new Date();
+            var current_year = datetime.getFullYear();
+            let sql = `SELECT (SUM(iznos)- SUM(iznos_nabavna)), SUM(iznos) FROM racuni WHERE (YEAR(datum_izdavanja) = ${current_year})`;
+            let query = db.query(sql, (err, result) => {
+                if(err) throw err;
+                res.send(result);
+            });
+        }
     });
+    
 });
 
 //post korisnik
@@ -107,14 +131,14 @@ router.put('/postbonus/:id', (req, res) => {
     })
 });
 
-router.post('/login', (req, res) => {
+router.post('/getToken', (req, res) => {
 
     const user = {
         username: 'user',
         pasword: 'user123'
     }
 
-    jwt.sign({user: user}, 'token', (err, token) => {
+    jwt.sign({user: user}, 'mobiletown', (err, token) => {
         res.json({
             token
         });
