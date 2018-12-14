@@ -120,7 +120,7 @@ router.post('/postbonus', (req, res) => {
 
 
 
-//http put
+//http put bonus
 router.put('/postbonus/:id', (req, res) => {
     const id = req.params.id; 
     let bonus = req.body;
@@ -130,6 +130,26 @@ router.put('/postbonus/:id', (req, res) => {
         res.send(result);
     })
 });
+
+router.get('/getkorisnici', verifyToken, (req, res) => {
+
+    jwt.verify(req.token, 'mobiletown', (err, authData) => {
+        if(err)
+        {
+            res.sendStatus(403);
+        }
+        else
+        {
+            let sql = "SELECT * FROM korisnici";
+            let query = db.query(sql, (err, result) => {
+            if(err) throw err;
+            res.send(result);
+            });
+        }
+    });
+    
+});
+
 
 router.post('/getToken', (req, res) => {
 
