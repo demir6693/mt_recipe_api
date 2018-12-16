@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
+const empty = require('is-empty');
 
 const db = mysql.createConnection({
-    host: '*',
-    user: '*',
-    password: '*',
-    database: '*'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'mobile_town'
 });
 
 db.connect((err => {
@@ -176,6 +177,39 @@ router.post('/getToken', (req, res) => {
             token
         });
     });
+});
+
+router.post('/login', verifyToken, (req, res) => {
+
+    let user = req.body;
+
+
+
+    jwt.verify(req.token, 'mobiletown', (err, authData) => {
+        if(err)
+        {
+            res.sendStatus(403);
+        }
+        else
+        {
+            let sql = "SELECT * FROM korisnici WHERE korisnicko_ime = '" + user.username + "' AND sifra = '" + user.password + "';";
+            let query = db.query(sql, (err, result) => {
+                
+                if(err) throw err;
+
+                if(!empty(result))
+                {
+                    res.send(result);   
+                }
+                else
+                {
+                    res.send(false);
+                }
+        
+            });
+        }
+    });
+
 });
 
 
