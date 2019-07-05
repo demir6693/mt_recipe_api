@@ -5,10 +5,11 @@ const jwt = require('jsonwebtoken');
 const empty = require('is-empty');
 
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: '80.241.218.76',
     user: 'root',
-    password: '',
-    database: 'mobile_town'
+    password: 'Agovicetf6693',
+    database: 'mobile_town',
+    socketPath: '/run/mysqld/mysqld.sock'
 });
 
 db.connect((err => {
